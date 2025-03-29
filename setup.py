@@ -13,4 +13,4 @@ setup(
         ],
     },
     python_requires=">=3.13",
-) 
+)
