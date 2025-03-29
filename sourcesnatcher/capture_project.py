@@ -7,11 +7,11 @@ import json
 import yaml
 import sys
 from pathlib import Path
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Any, Optional, Collection
 from shutil import which
 
 class ProjectCapture:
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize with default or custom configuration."""
         self.config = {
             'excluded_dirs': ['.git', '.terraform', 'lib', '__pycache__', 
@@ -80,12 +80,12 @@ class ProjectCapture:
             if not os.path.exists(startpath):
                 raise FileNotFoundError(f"'src' directory not found in {startpath}")
 
-        result = {
+        result: Dict[str, Any] = {
             'tree': '',
             'files': {}
         }
 
-        def generate_tree(path: str, prefix: str = '') -> str:
+        def generate_tree(path: str, prefix: str = '') -> List[str]:
             """Generate a tree-like structure of the directory."""
             if debug:
                 print(f"Generating tree for: {path}", file=sys.stderr)
@@ -125,7 +125,7 @@ class ProjectCapture:
             return tree_lines
 
         # Generate tree structure
-        tree_lines = [os.path.basename(startpath)]
+        tree_lines: List[str] = [os.path.basename(startpath)]
         tree_lines.extend(generate_tree(startpath))
         result['tree'] = '\n'.join(tree_lines)
 
