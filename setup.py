@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="sourcesnatcher",
@@ -11,8 +11,8 @@ setup(
         "pyyaml>=6.0.2",
     ],
     entry_points={
-        'console_scripts': [
-            'capture-project=sourcesnatcher.capture_project:main',
+        "console_scripts": [
+            "capture-project=sourcesnatcher.capture_project:main",
         ],
     },
     python_requires=">=3.13",
