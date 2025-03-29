@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from sourcesnatcher import ProjectCapture
+from sourcesnatcher.capture_project import ProjectCapture
 
 def test_capture_structure_text_format(temp_project_dir):
     """Test capturing project structure in text format."""

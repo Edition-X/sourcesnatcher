@@ -7,13 +7,13 @@ import json
 import yaml
 import sys
 from pathlib import Path
-from typing import List, Set, Dict, Any, Optional, Collection
+from typing import List, Set, Dict, Any, Optional, Collection, cast
 from shutil import which
 
 class ProjectCapture:
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize with default or custom configuration."""
-        self.config = {
+        self.config: Dict[str, Any] = {
             'excluded_dirs': ['.git', '.terraform', 'lib', '__pycache__', 
                             'venv', 'node_modules', 'autoload', 'backup', 'pack'],
             'excluded_files': ['credentials.txt', '.gitignore'],
@@ -35,11 +35,13 @@ class ProjectCapture:
         filename = os.path.basename(file_path)
         
         # If include_files is not empty, only those files are considered text files
-        if self.config['include_files']:
-            return filename in self.config['include_files']
+        include_files = cast(List[str], self.config['include_files'])
+        if include_files:
+            return filename in include_files
         
         # Otherwise, check extensions and mime type
-        if any(filename.endswith(ext) for ext in self.config['text_extensions']):
+        text_extensions = cast(List[str], self.config['text_extensions'])
+        if any(filename.endswith(ext) for ext in text_extensions):
             return True
         
         # Check mime type only if not in text_extensions
@@ -51,7 +53,8 @@ class ProjectCapture:
         Check if a file should be included in the output.
         """
         filename = os.path.basename(file_path)
-        return (filename not in self.config['excluded_files'] and 
+        excluded_files = cast(List[str], self.config['excluded_files'])
+        return (filename not in excluded_files and 
                 self.is_text_file(file_path))
 
     def check_dependencies(self) -> None:
@@ -99,7 +102,8 @@ class ProjectCapture:
                 
                 # Skip excluded directories
                 if os.path.isdir(entry_path):
-                    if entry in self.config['excluded_dirs']:
+                    excluded_dirs = cast(List[str], self.config['excluded_dirs'])
+                    if entry in excluded_dirs:
                         if debug:
                             print(f"Skipping excluded directory: {entry}", file=sys.stderr)
                         continue
@@ -137,7 +141,8 @@ class ProjectCapture:
             
         for root, dirs, files in os.walk(startpath):
             # Filter out excluded directories
-            dirs[:] = [d for d in dirs if d not in self.config['excluded_dirs']]
+            excluded_dirs = cast(List[str], self.config['excluded_dirs'])
+            dirs[:] = [d for d in dirs if d not in excluded_dirs]
             
             # Filter and process files
             for file in files:

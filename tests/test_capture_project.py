@@ -1,7 +1,7 @@
 import os
 import pytest
 from pathlib import Path
-from sourcesnatcher import ProjectCapture
+from sourcesnatcher.capture_project import ProjectCapture
 
 @pytest.fixture
 def sample_project(tmp_path):

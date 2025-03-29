@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from sourcesnatcher import ProjectCapture
+from sourcesnatcher.capture_project import ProjectCapture
 
 def test_project_capture_initialization():
     """Test that ProjectCapture initializes with default config."""
