@@ -22,7 +22,8 @@ jobs:
         pipenv install --dev
     - name: Lint
       run: |
-        pipenv run lint
+        pipenv run flake8 .
+        pipenv run mypy .
     - name: Format check
       run: |
         pipenv run black --check .
