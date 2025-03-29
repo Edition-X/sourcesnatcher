@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyyaml = "==6.0.2"
+
+[dev-packages]
+pytest = "==8.0.2"
+black = "==24.2.0"
+mypy = "==1.8.0"
+pytest-cov = "==4.1.0"
+flake8 = "==7.0.0"
+isort = "==5.13.2"
+
+[requires]
+python_version = "3.13"
+
+[scripts]
+test = "pytest"
+format = "black . && isort ."
+lint = "flake8 . && mypy ."
+coverage = "pytest --cov=. --cov-report=html"
+install-dev = "pip install -e ." 

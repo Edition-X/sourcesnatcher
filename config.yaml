@@ -1,0 +1,30 @@
+excluded_dirs:
+  - .git
+  - .terraform
+  - lib
+  - __pycache__
+  - venv
+  - node_modules
+  - autoload
+  - backup
+  - pack
+
+excluded_files:
+  - credentials.txt
+  - .gitignore
+
+text_extensions:
+  - .yml
+  - .yaml
+  - .json
+  - .j2
+  - .conf
+  - .txt
+  - .md
+  - .py
+  - .gitignore
+
+include_files:
+  - Makefile
+  - inventory
+  - ansible.cfg 
