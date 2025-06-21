@@ -241,7 +241,9 @@ def main():
     # Generate output filename if not provided
     if not args.output:
         project_name = os.path.basename(os.path.normpath(args.directory))
-        args.output = f"{project_name}_contents.{args.format}"
+        # Use .txt extension for text format, otherwise use the format as the extension
+        extension = "txt" if args.format == "text" else args.format
+        args.output = f"{project_name}_contents.{extension}"
 
     try:
         capturer = ProjectCapture(config)
