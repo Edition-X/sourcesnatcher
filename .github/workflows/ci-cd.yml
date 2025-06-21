@@ -10,11 +10,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4  # Updated to v4
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.13'
+    - name: Set up caching
+      uses: actions/cache@v3
+      with:
+        path: ~/.local/share/virtualenvs
+        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pipenv-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -30,7 +37,7 @@ jobs:
         pipenv run isort --check .
     - name: Test with pytest
       run: |
-        pipenv run test
+        pipenv run pytest --cov=. --cov-report=xml
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       if: success()
@@ -42,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4  # Updated to v4
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -59,4 +66,4 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
-        skip_existing: true 
+        skip_existing: true
