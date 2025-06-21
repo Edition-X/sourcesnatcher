@@ -34,17 +34,23 @@ jobs:
         pipenv run black --check .
         pipenv run isort --check .
     
+    # Extract current branch name
+    - name: Extract branch name
+      id: extract_branch
+      shell: bash
+      run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
     # Auto-create PR to main if checks pass
     - name: Create Pull Request to main
-      if: success()
+      if: success() && steps.extract_branch.outputs.branch != 'main'
       uses: peter-evans/create-pull-request@v5
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: Auto PR from dev to main
-        title: 'Auto PR: Dev to Main'
+        commit-message: "Auto PR from ${{ steps.extract_branch.outputs.branch }} to main"
+        title: 'Auto PR: ${{ steps.extract_branch.outputs.branch }} to Main'
         body: |
-          This PR was automatically created after successful dev branch checks.
-          It contains the latest changes from the dev branch that passed all linting and formatting checks.
-        branch: auto-pr-to-main
+          This PR was automatically created after successful checks on the `${{ steps.extract_branch.outputs.branch }}` branch.
+          It contains the latest changes that passed all linting and formatting checks.
+        branch: pr-${{ steps.extract_branch.outputs.branch }}-to-main
         base: main
         labels: automated-pr
