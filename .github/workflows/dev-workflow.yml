@@ -39,18 +39,26 @@ jobs:
       id: extract_branch
       shell: bash
       run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-
-    # Auto-create PR to main if checks pass
+      
+    # Auto-create PR to main if checks pass using GitHub CLI
     - name: Create Pull Request to main
       if: success() && steps.extract_branch.outputs.branch != 'main'
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "Auto PR from ${{ steps.extract_branch.outputs.branch }} to main"
-        title: 'Auto PR: ${{ steps.extract_branch.outputs.branch }} to Main'
-        body: |
-          This PR was automatically created after successful checks on the `${{ steps.extract_branch.outputs.branch }}` branch.
-          It contains the latest changes that passed all linting and formatting checks.
-        branch: pr-${{ steps.extract_branch.outputs.branch }}-to-main
-        base: main
-        labels: automated-pr
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+      run: |
+        # Check if PR already exists
+        existing_pr=$(gh pr list --head "$BRANCH_NAME" --base main --json number --jq '.[0].number')
+        
+        if [ -z "$existing_pr" ]; then
+          # Create new PR if one doesn't exist
+          gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title "Auto PR: $BRANCH_NAME to Main" \
+            --body "This PR was automatically created after successful checks on the \`$BRANCH_NAME\` branch.\nIt contains the latest changes that passed all linting and formatting checks." \
+            --label automated-pr
+          echo "Created new PR from $BRANCH_NAME to main"
+        else
+          echo "PR already exists: #$existing_pr"
+        fi
