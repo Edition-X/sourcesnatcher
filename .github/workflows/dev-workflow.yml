@@ -4,6 +4,10 @@ on:
   push:
     branches-ignore: [ main ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   lint-and-format:
     runs-on: ubuntu-latest
