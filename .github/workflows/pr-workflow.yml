@@ -9,10 +9,40 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
+  security-check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Security scan
+      uses: pypa/gh-action-pip-audit@v1.0.8
+      with:
+        inputs: Pipfile
+
+  test:
+    needs: security-check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check sensitive file changes
+      run: |
+        CHANGED_FILES=$(git diff --name-only origin/main..HEAD)
+        SENSITIVE="setup.py|.github/workflows/|Pipfile"
+        if echo "$CHANGED_FILES" | grep -E "$SENSITIVE"; then
+          echo " Sensitive files detected: $(echo "$CHANGED_FILES" | grep -E "$SENSITIVE" | tr '\n' ' ')"
+          if [[ ! "${{ contains(github.event.pull_request.labels.*.name, 'admin-approved') }}" == "true" ]]; then
+            echo " Sensitive files changed - requires admin-approved label"
+            echo "Changed files: $CHANGED_FILES"
+            exit 1
+          else
+            echo " Sensitive files approved by admin"
+          fi
+        else
+          echo " No sensitive files changed"
+        fi
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -49,7 +79,11 @@ jobs:
         
     # Auto-merge the PR if it's an automated PR and tests pass
     - name: Auto-merge PR
-      if: success() && contains(github.event.pull_request.labels.*.name, 'automated-pr')
+      if: |
+        success() && 
+        contains(github.event.pull_request.labels.*.name, 'automated-pr') &&
+        !contains(github.event.pull_request.labels.*.name, 'hold-merge') &&
+        needs.security-check.result == 'success'
       uses: pascalgn/automerge-action@v0.15.6
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

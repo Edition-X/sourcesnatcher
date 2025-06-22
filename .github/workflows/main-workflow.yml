@@ -9,7 +9,26 @@ permissions:
   pull-requests: write
 
 jobs:
+  validate-merge:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Validate automated merge
+      run: |
+        echo "Checking commit message: ${{ github.event.head_commit.message }}"
+        if [[ "${{ github.event.head_commit.message }}" != *"Auto-merge PR"* ]]; then
+          echo " Direct push to main detected - only automated merges allowed"
+          echo "Commit message: ${{ github.event.head_commit.message }}"
+          exit 1
+        else
+          echo " Automated merge validated"
+        fi
+
   version-and-publish:
+    needs: validate-merge
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
